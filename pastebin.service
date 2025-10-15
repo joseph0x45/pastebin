@@ -1,0 +1,15 @@
+[Unit]
+Description=PasteBin Service
+After=network.target
+
+[Service]
+ExecStartPre=/bin/mkdir -p /var/lib/pastebin
+ExecStartPre=/bin/chown alpha:alpha /var/lib/pastebin
+ExecStart=/usr/local/bin/pastebin --port 8080 --db /var/lib/pastebin/data.db
+WorkingDirectory=/var/lib/pastebin
+User=alpha
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
