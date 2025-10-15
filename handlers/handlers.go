@@ -51,6 +51,10 @@ func (h *Handler) CreateNewPaste(w http.ResponseWriter, r *http.Request) {
 		log.Println("[ERROR]: Error while creating paste: Failed to decode request body: ", err.Error())
 		return
 	}
+	if payload.Title == "" || payload.Content == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	id, err := h.idGenerator.Generate()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -72,7 +76,7 @@ func (h *Handler) CreateNewPaste(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeletePaste(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	id := r.PathValue("id")
 	err := db.DeletePaste(h.conn, id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -80,4 +84,46 @@ func (h *Handler) DeletePaste(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) GetAllPastes(w http.ResponseWriter, r *http.Request) {
+	pastes, err := db.GetAllPastes(h.conn)
+	if err != nil {
+		log.Println("[ERROR]: Error while getting pastes: ", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	data, err := json.Marshal(map[string]any{
+		"pastes": pastes,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
+func (h *Handler) GetPasteByID(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	paste, err := db.GetPasteByID(h.conn, id)
+	if err != nil {
+		log.Println("[ERROR]: Error while getting paste by ID: ", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if paste == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	bytes, err := json.Marshal(map[string]any{
+		"paste": paste,
+	})
+	if err != nil {
+		log.Println("[ERROR]: Error while getting paste by ID: ", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes)
 }

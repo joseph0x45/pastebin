@@ -20,7 +20,7 @@ templ main() {
         this.loading = true
         this.message = ""
         try {
-          const response = await fetch("/api/paste", {
+          const response = await fetch("/api/pastes", {
             method: "POST",
             body: JSON.stringify({
               title: this.title,

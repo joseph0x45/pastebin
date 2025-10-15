@@ -42,7 +42,7 @@ templ pastes(data []models.Paste) {
       async deletePaste() {
         const id = this.$root.dataset.id
         try {
-          const response = await fetch(`/api/paste?id=${id}`, {
+          const response = await fetch(`/api/pastes/${id}`, {
             method: "DELETE"
           })
           if (response.status == 200) {

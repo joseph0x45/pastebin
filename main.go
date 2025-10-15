@@ -28,8 +28,10 @@ func main() {
 
 	mux.HandleFunc("GET /", handler.RenderHomePage)
 	mux.HandleFunc("GET /pastes", handler.RenderPastesPage)
-	mux.HandleFunc("POST /api/paste", handler.CreateNewPaste)
-	mux.HandleFunc("DELETE /api/paste", handler.DeletePaste)
+	mux.HandleFunc("POST /api/pastes", handler.CreateNewPaste)
+	mux.HandleFunc("GET /api/pastes/{id}", handler.GetPasteByID)
+	mux.HandleFunc("GET /api/pastes", handler.GetAllPastes)
+	mux.HandleFunc("DELETE /api/pastes/{id}", handler.DeletePaste)
 	mux.HandleFunc("GET /static/", http.FileServer(http.FS(static)).ServeHTTP)
 
 	server := http.Server{

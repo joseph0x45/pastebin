@@ -1,9 +1,12 @@
 package db
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"pastebin/models"
+
+	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -63,4 +66,19 @@ func DeletePaste(conn *sqlx.DB, id string) error {
 		return fmt.Errorf("Error while deleting paste with id %s: %w", id, err)
 	}
 	return nil
+}
+
+func GetPasteByID(conn *sqlx.DB, id string) (*models.Paste, error) {
+	paste := &models.Paste{}
+	const query = `
+    select * from pastes where id=$1
+  `
+	err := conn.Get(paste, query, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("Error while getting paste by id %s: %w", id, err)
+	}
+	return paste, nil
 }
