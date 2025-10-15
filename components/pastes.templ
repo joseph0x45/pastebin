@@ -8,15 +8,35 @@ templ Pastes(data []models.Paste) {
 
 templ pastes(data []models.Paste) {
 	<script>
+  function fallbackCopyToClipboard(text) {
+    const textarea = document.createElement("textarea")
+    textarea.value = text
+    textarea.style.position = "fixed"  // avoid scrolling to bottom
+    textarea.style.opacity = "0"
+    document.body.appendChild(textarea)
+    textarea.focus()
+    textarea.select()
+    document.execCommand("copy")
+    document.body.removeChild(textarea)
+  }
+
   function pasteHandler() {
     return {
+      message: "",
       async copyPaste() {
         try {
           const content = this.$root.dataset.content
-          await navigator.clipboard.writeText(content)
-          alert("Copied to clipboard")
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(content)
+          } else {
+            fallbackCopyToClipboard(content)
+          }
+          this.message = "Copied!"
+          setTimeout(() => this.message = "", 1500)
         } catch (err) {
-          alert("Failed to copy to clipboard", err)
+          console.error("Clipboard error:", err)
+          this.message = "Failed to copy"
+          setTimeout(() => this.message = "", 1500)
         }
       },
       async deletePaste() {
@@ -38,18 +58,16 @@ templ pastes(data []models.Paste) {
     }
   }
 </script>
-	<body class="bg-gray-50 min-h-screen flex flex-col items-center py-12 px-6">
+	<body class="bg-gray-50 min-h-screen flex flex-col items-center py-12 px-4 sm:px-6">
 		<div class="w-full max-w-4xl">
-			<div class="flex justify-between items-center mb-8">
-				<h1 class="text-4xl font-bold text-gray-800">Your Pastes</h1>
-				<a href="/" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+			<div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+				<h1 class="text-3xl sm:text-4xl font-bold text-gray-800 text-center sm:text-left">Your Pastes</h1>
+				<a href="/" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition text-center">
 					+ Create New Paste
 				</a>
 			</div>
 			if len(data) == 0 {
-				<p class="text-gray-500 text-center">
-					No pastes found.
-				</p>
+				<p class="text-gray-500 text-center">No pastes found.</p>
 			} else {
 				<div class="grid gap-4">
 					for _, paste := range data {
@@ -57,22 +75,30 @@ templ pastes(data []models.Paste) {
 							x-data="pasteHandler()"
 							data-id={ paste.ID }
 							data-content={ paste.Content }
-							class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-start justify-between hover:shadow-md transition"
+							class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-start sm:justify-between hover:shadow-md transition"
 						>
-							<div class="text-left overflow-hidden">
-								<h2 class="text-lg font-semibold text-gray-800 truncate">{ paste.Title } </h2>
-								<p class="text-gray-600 text-sm mt-1 line-clamp-2">{ paste.Content } </p>
+							<div class="text-left overflow-hidden w-full sm:w-auto">
+								<h2 class="text-lg font-semibold text-gray-800 truncate">{ paste.Title }</h2>
+								<p class="text-gray-600 text-sm mt-1 line-clamp-2 break-words">{ paste.Content }</p>
 							</div>
-							<div class="flex items-center gap-3 ml-4 flex-shrink-0">
-								<!-- Copy -->
-								<button @click="copyPaste()" class="text-blue-600 hover:text-blue-800 transition" title="Copy content">
+							<div class="flex items-center gap-3 mt-3 sm:mt-0 sm:ml-4 flex-shrink-0 justify-center sm:justify-end">
+								<button
+									@click="copyPaste()"
+									class="text-blue-600 hover:text-blue-800 transition text-xl"
+									title="Copy content"
+								>
 									📋
 								</button>
-								<!-- Delete -->
-								<button @click="deletePaste()" class="text-red-600 hover:text-red-800 transition" title="Delete paste">
+								<button
+									@click="deletePaste()"
+									class="text-red-600 hover:text-red-800 transition text-xl"
+									title="Delete paste"
+								>
 									🗑️
 								</button>
 							</div>
+							<!-- Inline feedback -->
+							<p x-show="message" x-text="message" class="text-green-600 text-sm mt-2 sm:mt-0 text-center sm:text-right"></p>
 						</div>
 					}
 				</div>
