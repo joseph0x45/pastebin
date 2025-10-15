@@ -2,13 +2,14 @@ package db
 
 import (
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"pastebin/models"
 
 	"github.com/jmoiron/sqlx"
 )
 
 func GetDBConnection() *sqlx.DB {
-	conn, err := sqlx.Connect("sqlite3", "")
+	conn, err := sqlx.Connect("sqlite3", "pastebin.db")
 	if err != nil {
 		panic(err)
 	}

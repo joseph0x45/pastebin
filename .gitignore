@@ -1,3 +1,5 @@
 *_templ.go
 static/styles.css
+static/alpine.js
 pastebin
+pastebin.db

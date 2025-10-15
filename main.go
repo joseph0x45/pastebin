@@ -1,11 +1,13 @@
 package main
 
 import (
-	"context"
 	"embed"
 	"log"
 	"net/http"
-	"pastebin/components"
+	"pastebin/db"
+	"pastebin/handlers"
+
+	"github.com/teris-io/shortid"
 )
 
 //go:embed static/*
@@ -15,13 +17,20 @@ var static embed.FS
 
 func main() {
 	mux := http.NewServeMux()
-	ctx := context.Background()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html")
-		components.Index().Render(ctx, w)
-	})
-	mux.Handle("/static/", http.FileServer(http.FS(static)))
+	conn := db.GetDBConnection()
+	idGenerator, err := shortid.New(1, shortid.DefaultABC, 6969)
+	if err != nil {
+		panic(err)
+	}
+
+	handler := handlers.NewHandler(conn, idGenerator)
+
+	mux.HandleFunc("GET /", handler.RenderHomePage)
+	mux.HandleFunc("GET /pastes", handler.RenderPastesPage)
+	mux.HandleFunc("POST /api/paste", handler.CreateNewPaste)
+	mux.HandleFunc("DELETE /api/paste", handler.DeletePaste)
+	mux.HandleFunc("GET /static/", http.FileServer(http.FS(static)).ServeHTTP)
 
 	server := http.Server{
 		Addr:    ":8080",

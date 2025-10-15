@@ -1,11 +1,75 @@
 package components
 
 templ Index() {
-	@Layout(main())
+@Layout(main())
 }
 
 templ main() {
-	<main>
-		<h1 class="bg-red-500 text-2xl">Hello from templlll</h1>
-	</main>
+<script type="text/javascript">
+  function createPasteForm() {
+    return {
+      title: "",
+      content: "",
+      message: "",
+      loading: false,
+      async createPaste() {
+        if (this.content == "" || this.title == "") {
+          this.message = "⚠️ Title and content are required."
+          return
+        }
+        this.loading = true
+        this.message = ""
+        try {
+          const response = await fetch("/api/paste", {
+            method: "POST",
+            body: JSON.stringify({
+              title: this.title,
+              content: this.content
+            })
+          })
+          if (response.status == 201) {
+            this.title = ""
+            this.content = ""
+            this.message = "✅ Paste created successfully!"
+          } else {
+            throw new Error("")
+          }
+        } catch (err) {
+          this.message = "❌ Failed to create paste."
+        } finally {
+          this.loading = false
+        }
+      }
+    }
+  }
+</script>
+
+<body x-data="createPasteForm()" class="bg-gray-50 flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-2xl px-6 text-center">
+    <h1 class="text-4xl font-bold text-gray-800 mb-8">Paste Bin</h1>
+    <form action="/create" method="POST" class="space-y-6">
+      <!-- Paste title -->
+      <input x-model="title" type="text" name="title" placeholder="Paste title"
+        class="w-full p-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        required />
+      <!-- Paste content -->
+      <textarea x-model="content" required name="content" rows="12"
+        class="w-full p-4 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        placeholder="Type or paste your text here..."></textarea>
+      <!-- Feedback message -->
+      <p x-show="message" x-text="message" class="text-sm mt-2"
+        :class="message.includes('✅') ? 'text-green-600' : 'text-red-600'"></p>
+      <!-- Action buttons -->
+      <div class="flex justify-center gap-4">
+        <button type="button" @click="createPaste()"
+          class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+          Create Paste
+        </button>
+        <a href="/pastes" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition">
+          View Pastes
+        </a>
+      </div>
+    </form>
+  </div>
+</body>
 }

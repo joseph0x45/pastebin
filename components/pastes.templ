@@ -1,0 +1,82 @@
+package components
+
+import "pastebin/models"
+
+templ Pastes(data []models.Paste) {
+	@Layout(pastes(data))
+}
+
+templ pastes(data []models.Paste) {
+	<script>
+  function pasteHandler() {
+    return {
+      async copyPaste() {
+        try {
+          const content = this.$root.dataset.content
+          await navigator.clipboard.writeText(content)
+          alert("Copied to clipboard")
+        } catch (err) {
+          alert("Failed to copy to clipboard", err)
+        }
+      },
+      async deletePaste() {
+        const id = this.$root.dataset.id
+        try {
+          const response = await fetch(`/api/paste?id=${id}`, {
+            method: "DELETE"
+          })
+          if (response.status == 200) {
+            alert("Paste deleted")
+            window.location.reload()
+          } else {
+            throw new Error("")
+          }
+        } catch (err) {
+          alert("Failed to delete paste ", err)
+        }
+      }
+    }
+  }
+</script>
+	<body class="bg-gray-50 min-h-screen flex flex-col items-center py-12 px-6">
+		<div class="w-full max-w-4xl">
+			<div class="flex justify-between items-center mb-8">
+				<h1 class="text-4xl font-bold text-gray-800">Your Pastes</h1>
+				<a href="/" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+					+ Create New Paste
+				</a>
+			</div>
+			if len(data) == 0 {
+				<p class="text-gray-500 text-center">
+					No pastes found.
+				</p>
+			} else {
+				<div class="grid gap-4">
+					for _, paste := range data {
+						<div
+							x-data="pasteHandler()"
+							data-id={ paste.ID }
+							data-content={ paste.Content }
+							class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-start justify-between hover:shadow-md transition"
+						>
+							<div class="text-left overflow-hidden">
+								<h2 class="text-lg font-semibold text-gray-800 truncate">{ paste.Title } </h2>
+								<p class="text-gray-600 text-sm mt-1 line-clamp-2">{ paste.Content } </p>
+							</div>
+							<div class="flex items-center gap-3 ml-4 flex-shrink-0">
+								<!-- Copy -->
+								<button @click="copyPaste()" class="text-blue-600 hover:text-blue-800 transition" title="Copy content">
+									📋
+								</button>
+								<!-- Delete -->
+								<button @click="deletePaste()" class="text-red-600 hover:text-red-800 transition" title="Delete paste">
+									🗑️
+								</button>
+							</div>
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</body>
+}

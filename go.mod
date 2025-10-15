@@ -7,4 +7,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 )
 
-require github.com/teris-io/shortid v0.0.0-20220617161101-71ec9f2aa569 // indirect
+require (
+	github.com/mattn/go-sqlite3 v1.14.32 // indirect
+	github.com/teris-io/shortid v0.0.0-20220617161101-71ec9f2aa569 // indirect
+)
