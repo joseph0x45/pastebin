@@ -11,8 +11,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func GetDBConnection() *sqlx.DB {
-	conn, err := sqlx.Connect("sqlite3", "pastebin.db")
+func GetDBConnection(dbPath string) *sqlx.DB {
+	conn, err := sqlx.Connect("sqlite3", dbPath)
 	if err != nil {
 		panic(err)
 	}

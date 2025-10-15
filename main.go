@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"flag"
 	"log"
 	"net/http"
 	"pastebin/db"
@@ -16,9 +17,12 @@ var static embed.FS
 //go:generate tailwindcss -i static/input.css -o static/styles.css -m
 
 func main() {
+	port := flag.String("port", "8080", "The port to start Pastebin on.")
+	dbPath := flag.String("db", "pastebin.db", "Path to the SQLite database file used by PasteBin.")
+	flag.Parse()
 	mux := http.NewServeMux()
 
-	conn := db.GetDBConnection()
+	conn := db.GetDBConnection(*dbPath)
 	idGenerator, err := shortid.New(1, shortid.DefaultABC, 6969)
 	if err != nil {
 		panic(err)
@@ -35,10 +39,10 @@ func main() {
 	mux.HandleFunc("GET /static/", http.FileServer(http.FS(static)).ServeHTTP)
 
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + *port,
 		Handler: mux,
 	}
-	log.Println("Starting Server on 8080. Visit http://localhost:8080")
+	log.Printf("Pastebin launched!\nVisit http://0.0.0.0:%s\nLearn more at https://github.com/joseph0x45/pastebin?tab=readme-ov-file#pastebin", *port)
 	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}

@@ -9,11 +9,19 @@ Pastes are persisted in the database.
 
 <img width="1865" height="1016" alt="image" src="https://github.com/user-attachments/assets/bfec712d-b27f-4829-a469-0e5cf2778a7c" />
 
-## Pastebin also exposes a HTTP interface
+## Customizing port
 By default Pastebin starts on port 8080. You can change this by providing the `-port` flag like so
 ```sh
 pastebin -port=6969
 ```
+
+## Customizing SQLite database used
+By default Pastebin creates a file named `pastebin.db` in the directory where it is launched. You can change this by providing the `-db` flag like so
+```sh
+pastebin -db=/path/to/my/db
+```
+
+## Pastebin also exposes a HTTP interface
 
 ### Creating a paste
 Curl example 
