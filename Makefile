@@ -1,10 +1,10 @@
 build:
-	templ generate && \
+	go tool templ generate && \
 	go generate && \
 	go build .
 
 build-release:
-	templ generate && \
+	go tool templ generate && \
 	go generate && \
 	go build -ldflags="-w -s"
 

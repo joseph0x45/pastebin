@@ -41,12 +41,15 @@ templ pastes(data []models.Paste) {
       },
       async deletePaste() {
         const id = this.$root.dataset.id
+        const confirmation = confirm("Do you really want to delete this paste?")
+        if (!confirmation) {
+          return
+        }
         try {
           const response = await fetch(`/api/pastes/${id}`, {
             method: "DELETE"
           })
           if (response.status == 200) {
-            alert("Paste deleted")
             window.location.reload()
           } else {
             throw new Error("")
