@@ -1,5 +1,2 @@
-*_templ.go
-static/styles.css
-static/alpine.js
-pastebin.db
-bin/
+tailwind.css
+pastebin
