@@ -1,0 +1,119 @@
+{{define "app"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pastebin</title>
+  <script src="/tailwindcss"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {mono: ['JetBrains Mono', 'monospace']},
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+
+<body class="bg-neutral-950 text-neutral-300 font-mono text-sm min-h-screen p-8">
+
+  <h1 class="text-white text-xl font-semibold mb-8 tracking-tight">
+    paste<span class="text-green-500">//</span>bin
+  </h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl">
+
+    <!-- New Paste Form -->
+    <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-5">
+      <h2 class="text-xs uppercase tracking-widest text-neutral-500 mb-4">New Paste</h2>
+      <form action="/pastes" method="POST" class="flex flex-col gap-3">
+
+        <div>
+          <label class="block text-xs text-neutral-500 uppercase tracking-wider mb-1">Title</label>
+          <input type="text" name="title" placeholder="Title"
+            class="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-neutral-200 text-sm placeholder-neutral-600 focus:outline-none focus:border-green-600 transition-colors" />
+        </div>
+
+        <div>
+          <label class="block text-xs text-neutral-500 uppercase tracking-wider mb-1">Content</label>
+          <textarea name="content" rows="10" placeholder="Content goes here"
+            class="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-neutral-200 text-sm placeholder-neutral-600 focus:outline-none focus:border-green-600 transition-colors resize-y leading-relaxed"></textarea>
+        </div>
+
+
+        <button type="submit"
+          class="w-full mt-1 py-2 bg-green-600 hover:bg-green-500 text-white font-semibold rounded text-sm transition-colors">
+          Create Paste
+        </button>
+      </form>
+    </div>
+
+    <!-- Paste List -->
+    <div>
+      <h2 class="text-xs uppercase tracking-widest text-neutral-500 mb-4">Recent Pastes</h2>
+
+      {{if .Pastes}}
+      <ul class="flex flex-col gap-2">
+        {{range .Pastes}}
+        <li
+          class="bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-3 hover:border-neutral-600 transition-colors">
+          <span class="hidden paste-content">{{.Content}}</span>
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-green-400 hover:text-green-300 font-semibold truncate transition-colors">
+              {{.Title}}
+            </p>
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="copyPaste(this)" title="Copy"
+                class="text-neutral-500 hover:text-green-400 transition-colors px-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                </svg>
+              </button>
+              <form action="/pastes/{{.ID}}/delete" method="POST" class="inline">
+                <button type="submit" title="Delete" class="text-neutral-500 hover:text-red-400 transition-colors px-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 mt-1">
+            <span class="text-xs text-neutral-600 truncate">{{.Preview}}</span>
+          </div>
+        </li>
+        {{end}}
+      </ul>
+      {{else}}
+      <div class="bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-10 text-center text-neutral-600 text-sm">
+        No pastes yet. Create one!
+      </div>
+      {{end}}
+    </div>
+
+  </div>
+
+  <script>
+    function copyPaste(btn) {
+      const content = btn.closest('li').querySelector('.paste-content').textContent;
+      navigator.clipboard.writeText(content).then(() => {
+        const icon = btn.innerHTML;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+        btn.classList.add('text-green-400');
+        setTimeout(() => {btn.innerHTML = icon; btn.classList.remove('text-green-400');}, 1500);
+      });
+    }
+  </script>
+</body>
+
+</html>
+{{end}}
