@@ -35,7 +35,7 @@ func DispatchCommands(args []string) {
 		fmt.Println(buildinfo.AppName, buildinfo.Version)
 		os.Exit(0)
 	case "service-file":
-		goutils.GenerateServiceFile("<no value>")
+		goutils.GenerateServiceFile("Simple, personal Pastebin")
 		os.Exit(0)
 	default:
 		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", cmd)
